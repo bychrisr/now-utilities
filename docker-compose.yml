@@ -1,0 +1,24 @@
+services:
+  backend:
+    build: ./backend
+    container_name: whisper-backend
+    expose:
+      - "8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONPATH=/app
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend/whisper
+    container_name: whisper-frontend
+    ports:
+      - "8001:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  default:
+    name: whisper-network
