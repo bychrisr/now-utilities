@@ -5,3 +5,4 @@ faster-whisper==0.10.0
 torch==2.1.2
 torchaudio==2.1.2
 numpy==1.24.3
+aiofiles==23.2.1

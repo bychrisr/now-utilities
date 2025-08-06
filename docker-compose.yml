@@ -6,6 +6,8 @@ services:
       - "8000"
     volumes:
       - ./backend:/app
+      - ./backend/inputs_temp:/app/inputs_temp
+      - ./backend/outputs:/app/outputs
     environment:
       - PYTHONPATH=/app
       - WHISPER_MODEL_SIZE=medium

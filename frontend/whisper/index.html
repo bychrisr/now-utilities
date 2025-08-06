@@ -4,88 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whisper Transcription - Now Agency</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <style>
-        .drop-zone {
-            border: 2px dashed #007bff;
-            border-radius: 10px;
-            padding: 40px;
-            text-align: center;
-            background-color: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-        .drop-zone.dragover {
-            background-color: #e3f2fd;
-            border-color: #0056b3;
-        }
-        .drop-zone i {
-            font-size: 3rem;
-            color: #007bff;
-            margin-bottom: 15px;
-        }
-        .transcription-result {
-            background-color: #f8f9fa;
-            border-left: 4px solid #007bff;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 0 5px 5px 0;
-        }
-        .loading {
-            display: none;
-        }
-        .file-info {
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-        }
-    </style>
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/bootstrap-icons.css">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
 </head>
 <body>
     <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-lg-8">
+            <div class="col-lg-10">
                 <div class="text-center mb-5">
                     <h1 class="display-4 fw-bold text-primary">Whisper Transcription</h1>
                     <p class="lead text-muted">Converta seus arquivos de áudio em texto com inteligência artificial</p>
                 </div>
 
-                <div class="card shadow">
+                <div class="card shadow mb-4">
                     <div class="card-body">
                         <form id="uploadForm">
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Selecione ou arraste um arquivo de áudio</label>
+                                <label class="form-label fw-bold">Selecione ou arraste arquivos de áudio</label>
                                 
                                 <!-- Drop Zone -->
                                 <div id="dropZone" class="drop-zone">
                                     <i class="bi bi-cloud-upload"></i>
-                                    <h5>Arraste e solte seu arquivo aqui</h5>
+                                    <h5>Arraste e solte seus arquivos aqui</h5>
                                     <p class="text-muted mb-3">ou</p>
                                     <button type="button" class="btn btn-primary" id="browseBtn">
-                                        <i class="bi bi-folder2-open me-2"></i>Procurar Arquivo
+                                        <i class="bi bi-folder2-open me-2"></i>Procurar Arquivos
                                     </button>
-                                    <input type="file" id="fileInput" class="d-none" accept="audio/*">
+                                    <input type="file" id="fileInput" class="d-none" accept="audio/*" multiple>
                                 </div>
 
-                                <!-- File Info -->
-                                <div id="fileInfo" class="file-info d-none">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <i class="bi bi-file-earmark-music"></i>
-                                            <span id="fileName"></span>
-                                        </div>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" id="removeFile">
-                                            <i class="bi bi-x"></i>
+                                <!-- File List -->
+                                <div id="fileList" class="file-list d-none mt-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">Arquivos Selecionados:</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="clearFiles">
+                                            <i class="bi bi-trash"></i> Limpar Todos
                                         </button>
                                     </div>
+                                    <div id="filesContainer"></div>
                                 </div>
                             </div>
 
                             <!-- Submit Button -->
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
-                                    <i class="bi bi-translate me-2"></i>Transcrever Áudio
+                                    <i class="bi bi-upload me-2"></i>Enviar Arquivos
                                 </button>
                             </div>
                         </form>
@@ -93,31 +58,29 @@
                         <!-- Loading Indicator -->
                         <div id="loading" class="loading text-center mt-4">
                             <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Processando...</span>
+                                <span class="visually-hidden">Enviando...</span>
                             </div>
-                            <p class="mt-2">Processando áudio... Isso pode levar alguns minutos</p>
+                            <p class="mt-2">Enviando arquivos... Aguarde</p>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Results -->
-                        <div id="results" class="d-none">
-                            <div class="transcription-result">
-                                <h5 class="mb-3">
-                                    <i class="bi bi-translate text-primary"></i> Transcrição
-                                </h5>
-                                <div class="mb-3">
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle"></i> 
-                                        <span id="resultInfo"></span>
-                                    </small>
-                                </div>
-                                <div class="bg-white p-3 rounded">
-                                    <p id="transcriptionText" class="mb-0"></p>
-                                </div>
-                                <div class="mt-3">
-                                    <button class="btn btn-outline-primary btn-sm" id="copyText">
-                                        <i class="bi bi-clipboard"></i> Copiar Texto
-                                    </button>
-                                </div>
+                <!-- Files Management Section -->
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-files"></i> Arquivos Processados</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2 mb-3">
+                            <button class="btn btn-outline-primary" type="button" id="refreshFiles">
+                                <i class="bi bi-arrow-repeat"></i> Atualizar Lista
+                            </button>
+                        </div>
+                        
+                        <div id="filesTableContainer">
+                            <div class="text-center text-muted">
+                                <i class="bi bi-inbox"></i>
+                                <p class="mb-0">Nenhum arquivo processado ainda</p>
                             </div>
                         </div>
                     </div>
@@ -131,8 +94,9 @@
                         <small class="text-muted">
                             <ul class="mb-0">
                                 <li>Suporta formatos: MP3, WAV, M4A, FLAC, etc.</li>
+                                <li>Você pode selecionar múltiplos arquivos de uma vez</li>
                                 <li>Arquivos muito grandes podem levar mais tempo para processar</li>
-                                <li>A transcrição é feita localmente com inteligência artificial</li>
+                                <li>As transcrições são salvas automaticamente</li>
                             </ul>
                         </small>
                     </div>
@@ -141,167 +105,42 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        class WhisperTranscriber {
-            constructor() {
-                this.file = null;
-                this.initializeElements();
-                this.bindEvents();
-            }
+    <!-- Modal para exibir transcrição -->
+    <div class="modal fade" id="transcriptionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="transcriptionModalLabel">Transcrição</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalLoading" class="text-center">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Carregando transcrição...</p>
+                    </div>
+                    <div id="transcriptionContent" class="d-none">
+                        <div class="mb-3">
+                            <small class="text-muted" id="modalFileInfo"></small>
+                        </div>
+                        <div class="bg-light p-3 rounded">
+                            <p id="modalTranscriptionText" class="mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="copyModalText">
+                        <i class="bi bi-clipboard"></i> Copiar
+                    </button>
+                    <a href="#" class="btn btn-success" id="downloadTranscription" download>
+                        <i class="bi bi-download"></i> Baixar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            initializeElements() {
-                this.dropZone = document.getElementById('dropZone');
-                this.fileInput = document.getElementById('fileInput');
-                this.browseBtn = document.getElementById('browseBtn');
-                this.submitBtn = document.getElementById('submitBtn');
-                this.form = document.getElementById('uploadForm');
-                this.fileName = document.getElementById('fileName');
-                this.fileInfo = document.getElementById('fileInfo');
-                this.removeFile = document.getElementById('removeFile');
-                this.loading = document.getElementById('loading');
-                this.results = document.getElementById('results');
-                this.transcriptionText = document.getElementById('transcriptionText');
-                this.resultInfo = document.getElementById('resultInfo');
-                this.copyText = document.getElementById('copyText');
-            }
-
-            bindEvents() {
-                // Browse button click
-                this.browseBtn.addEventListener('click', () => {
-                    this.fileInput.click();
-                });
-
-                // File input change
-                this.fileInput.addEventListener('change', (e) => {
-                    if (e.target.files.length > 0) {
-                        this.setFile(e.target.files[0]);
-                    }
-                });
-
-                // Drop zone events
-                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                    this.dropZone.addEventListener(eventName, this.preventDefaults, false);
-                });
-
-                ['dragenter', 'dragover'].forEach(eventName => {
-                    this.dropZone.addEventListener(eventName, () => {
-                        this.dropZone.classList.add('dragover');
-                    }, false);
-                });
-
-                ['dragleave', 'drop'].forEach(eventName => {
-                    this.dropZone.addEventListener(eventName, () => {
-                        this.dropZone.classList.remove('dragover');
-                    }, false);
-                });
-
-                // Handle dropped files
-                this.dropZone.addEventListener('drop', (e) => {
-                    const dt = e.dataTransfer;
-                    const files = dt.files;
-                    if (files.length > 0) {
-                        this.setFile(files[0]);
-                    }
-                }, false);
-
-                // Remove file
-                this.removeFile.addEventListener('click', () => {
-                    this.clearFile();
-                });
-
-                // Form submit
-                this.form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    if (this.file) {
-                        this.transcribeFile();
-                    }
-                });
-
-                // Copy text
-                this.copyText.addEventListener('click', () => {
-                    this.copyToClipboard();
-                });
-            }
-
-            preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-            setFile(file) {
-                if (file.type.startsWith('audio/')) {
-                    this.file = file;
-                    this.fileName.textContent = file.name;
-                    this.fileInfo.classList.remove('d-none');
-                    this.submitBtn.disabled = false;
-                } else {
-                    alert('Por favor, selecione um arquivo de áudio válido.');
-                }
-            }
-
-            clearFile() {
-                this.file = null;
-                this.fileInput.value = '';
-                this.fileInfo.classList.add('d-none');
-                this.submitBtn.disabled = true;
-                this.results.classList.add('d-none');
-            }
-
-            async transcribeFile() {
-    const formData = new FormData();
-    formData.append('file', this.file);
-
-    // Show loading
-    this.loading.style.display = 'block';
-    this.submitBtn.disabled = true;
-    this.submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
-
-    try {
-        const response = await fetch('/api/transcribe', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        // Display results
-        this.transcriptionText.textContent = data.transcription;
-        this.resultInfo.textContent = `Idioma: ${data.language} (${(data.language_probability * 100).toFixed(1)}%) | Duração: ${Math.round(data.duration)} segundos`;
-        this.results.classList.remove('d-none');
-        
-    } catch (error) {
-        console.error('Error:', error);
-        alert(`Erro ao transcrever o arquivo: ${error.message}`);
-    } finally {
-        // Hide loading
-        this.loading.style.display = 'none';
-        this.submitBtn.disabled = false;
-        this.submitBtn.innerHTML = '<i class="bi bi-translate me-2"></i>Transcrever Áudio';
-    }
-}
-
-            copyToClipboard() {
-                const text = this.transcriptionText.textContent;
-                navigator.clipboard.writeText(text).then(() => {
-                    const originalText = this.copyText.innerHTML;
-                    this.copyText.innerHTML = '<i class="bi bi-check"></i> Copiado!';
-                    setTimeout(() => {
-                        this.copyText.innerHTML = originalText;
-                    }, 2000);
-                });
-            }
-        }
-
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', () => {
-            new WhisperTranscriber();
-        });
-    </script>
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script src="./js/app.js"></script>
 </body>
 </html>
