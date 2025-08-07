@@ -1,26 +1,137 @@
+/* Importar a fonte Inter do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* --- Cores do Tema Light (padrão) --- */
+  --now-primary: #00302A;     /* Deep Green */
+  --now-secondary: #FA8D2A;   /* Warm Gold */
+  --now-background: #FFFFFF;  /* White */
+  --now-surface: #FFFFFF;     /* Usando White como Surface também para light */
+  --now-error: #EF5550;       /* Soft Red */
+  --now-on-primary: #FFFFFF;  /* Texto sobre Deep Green */
+  --now-on-secondary: #000000; /* Texto sobre Warm Gold (ajuste se necessário) */
+  --now-on-background: #000000; /* Texto principal */
+  --now-on-surface: #000000;  /* Texto em surfaces */
+  --now-on-error: #FFFFFF;    /* Texto sobre Soft Red */
+
+  /* --- Tipografia --- */
+  --now-font-family-sans-serif: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --now-font-family-base: var(--now-font-family-sans-serif);
+
+  /* Tamanhos de fonte (ajustados para Bootstrap 5) */
+  --now-font-size-display: 2.5rem; /* 40pt -> ~2.5rem */
+  --now-font-size-headline: 1.75rem; /* 28pt -> ~1.75rem */
+  --now-font-size-subheading: 1.25rem; /* 20pt -> ~1.25rem */
+  --now-font-size-body: 0.875rem; /* 14pt -> 0.875rem */
+}
+
+/* --- Sobrescrever variáveis padrão do Bootstrap 5 --- */
+/* Isso aplica automaticamente as cores e fontes personalizadas */
+:root {
+  /* Cores */
+  --bs-primary: var(--now-primary);
+  --bs-secondary: var(--now-secondary);
+  --bs-danger: var(--now-error); /* Usar Soft Red para erros */
+  --bs-body-bg: var(--now-background);
+  --bs-body-color: var(--now-on-background);
+
+  /* Tipografia */
+  --bs-font-sans-serif: var(--now-font-family-base);
+  --bs-body-font-size: var(--now-font-size-body);
+  --bs-body-font-weight: 400;
+  --bs-body-line-height: 1.5;
+
+  /* Cores dos botões */
+  --bs-btn-font-weight: 600; /* SemiBold para botões */
+}
+
+/* --- Estilos adicionais para elementos específicos --- */
+
+/* Aplicar tipografia aos títulos */
+.display-4 {
+  font-size: var(--now-font-size-display) !important;
+  font-weight: 700 !important; /* Bold */
+}
+
+h1, .h1 {
+  font-size: var(--now-font-size-headline) !important;
+  font-weight: 600 !important; /* SemiBold */
+}
+
+h5, .h5, .card-title {
+  font-size: var(--now-font-size-subheading) !important;
+  font-weight: 500 !important; /* Medium */
+}
+
+/* Estilo para os badges de status */
+.badge {
+  font-weight: 500; /* Medium */
+}
+
+/* Ajustar cor do botão primário (agora usando a cor primária personalizada) */
+.btn-primary {
+  --bs-btn-bg: var(--now-primary);
+  --bs-btn-border-color: var(--now-primary);
+  --bs-btn-hover-bg: #001a16; /* Tom mais escuro para hover */
+  --bs-btn-hover-border-color: #001a16;
+  --bs-btn-active-bg: #001a16;
+  --bs-btn-active-border-color: #001a16;
+  --bs-btn-disabled-bg: var(--now-primary);
+  --bs-btn-disabled-border-color: var(--now-primary);
+}
+
+/* Ajustar cor do botão secundário (agora usando a cor secundária personalizada) */
+.btn-secondary {
+  --bs-btn-bg: var(--now-secondary);
+  --bs-btn-border-color: var(--now-secondary);
+  --bs-btn-hover-bg: #e97c19; /* Tom mais escuro para hover */
+  --bs-btn-hover-border-color: #e97c19;
+  --bs-btn-active-bg: #e97c19;
+  --bs-btn-active-border-color: #e97c19;
+  --bs-btn-disabled-bg: var(--now-secondary);
+  --bs-btn-disabled-border-color: var(--now-secondary);
+  color: var(--now-on-secondary) !important; /* Garantir contraste */
+}
+
+/* Ajustar cor do botão de sucesso (verde) para manter funcionalidade */
+.btn-success {
+  --bs-btn-bg: #198754; /* Verde padrão do Bootstrap */
+  --bs-btn-border-color: #198754;
+  --bs-btn-hover-bg: #157347;
+  --bs-btn-hover-border-color: #157347;
+  --bs-btn-active-bg: #157347;
+  --bs-btn-active-border-color: #157347;
+  --bs-btn-disabled-bg: #198754;
+  --bs-btn-disabled-border-color: #198754;
+}
+
+/* --- Estilos existentes do projeto --- */
+
 .drop-zone {
-    border: 2px dashed #007bff;
+    border: 2px dashed var(--now-primary);
     border-radius: 10px;
     padding: 40px;
     text-align: center;
-    background-color: #f8f9fa;
+    background-color: var(--now-surface);
     transition: all 0.3s ease;
+    /* Adicionar sombra sutil */
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 .drop-zone.dragover {
-    background-color: #e3f2fd;
-    border-color: #0056b3;
+    background-color: #e3f2fd; /* Pode manter este azul claro para feedback de drag */
+    border-color: #0056b3; /* Ou escurecer a cor primária */
 }
 
 .drop-zone i {
     font-size: 1.5rem;
-    color: #FFF;
+    color: var(--now-primary);
     margin-bottom: 15px;
 }
 
 .transcription-result {
-    background-color: #f8f9fa;
-    border-left: 4px solid #007bff;
+    background-color: var(--now-surface);
+    border-left: 4px solid var(--now-primary);
     padding: 20px;
     margin-top: 20px;
     border-radius: 0 5px 5px 0;
@@ -31,7 +142,7 @@
 }
 
 .file-info {
-    background-color: #e9ecef;
+    background-color: #e9ecef; /* Pode usar uma cor neutra ou definir uma variável para superfícies secundárias */
     padding: 10px;
     border-radius: 5px;
     margin-top: 15px;
@@ -53,11 +164,58 @@
 /* Ajustes para a nova estrutura */
 .card {
     margin-bottom: 20px;
+    border: none; /* Remover borda padrão */
+    border-radius: 10px; /* Bordas arredondadas */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05); /* Sombra suave */
 }
 
-.btn-transcribe {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
+/* Cabeçalho do card com cor primária */
+.card-header.bg-primary {
+    background-color: var(--now-primary) !important;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* Botão de refresh */
+.btn-outline-primary {
+    --bs-btn-color: var(--now-primary);
+    --bs-btn-border-color: var(--now-primary);
+    --bs-btn-hover-color: var(--now-on-primary);
+    --bs-btn-hover-bg: var(--now-primary);
+    --bs-btn-hover-border-color: var(--now-primary);
+    --bs-btn-active-color: var(--now-on-primary);
+    --bs-btn-active-bg: var(--now-primary);
+    --bs-btn-active-border-color: var(--now-primary);
+}
+
+/* Tabela */
+.table-hover > tbody > tr:hover > * {
+    --bs-table-hover-bg: rgba(0, 48, 42, 0.075); /* Hover suave com a cor primária */
+}
+
+/* Modal */
+.modal-content {
+    border: none;
+    border-radius: 10px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Botão de fechar modal */
+.btn-close {
+    filter: var(--bs-btn-close-white-filter); /* Ajusta a cor do 'x' se o fundo for escuro */
+}
+
+/* Garantir que o texto dentro de elementos com fundo colorido tenha bom contraste */
+.bg-primary, .bg-success, .bg-danger, .bg-warning {
+    color: white; /* Ou usar as variáveis --now-on-* se definidas */
+}
+.bg-info {
+    color: #000; /* Ou usar uma cor de texto apropriada */
 }
