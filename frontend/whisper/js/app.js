@@ -18,6 +18,8 @@ function initApp() {
             this.refreshInterval = null;
             this.modalInstance = null;
             this.isRefreshing = false;
+            // Adiciona um Set para rastrear transcrições já solicitadas
+            this.transcriptionRequests = new Set();
             this.initializeElements();
             this.bindEvents();
             this.loadProcessedFiles();
@@ -269,18 +271,14 @@ function initApp() {
 
         async loadProcessedFiles() {
             // Evitar múltiplas requisições simultâneas
-            if (this.isRefreshing) {
+            if (this.isRefreshing || !this.filesTableContainer) {
                 return;
             }
             
             this.isRefreshing = true;
             
             try {
-                const response = await fetch('./api/files', {
-                    method: 'GET',
-                    timeout: 600000 // 10 minutos
-                });
-
+                const response = await fetch('./api/files');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -290,7 +288,7 @@ function initApp() {
                 this.renderFilesTable();
             } catch (error) {
                 console.error('Error loading files:', error);
-                alert('Erro ao carregar arquivos. Por favor, tente novamente.');
+                // Não mostrar erro na interface para não incomodar o usuário
             } finally {
                 this.isRefreshing = false;
             }
@@ -402,21 +400,26 @@ function initApp() {
 
             this.filesTableContainer.innerHTML = tableHtml;
 
-            // Adicionar eventos aos botões (delegated events)
-            this.filesTableContainer.addEventListener('click', (e) => {
+            // Adicionar eventos aos botões usando event delegation no container
+            // Isso evita problemas de listeners duplicados
+            this.filesTableContainer.onclick = (e) => {
                 if (e.target.closest('.transcribe-btn')) {
                     const button = e.target.closest('.transcribe-btn');
                     const filename = button.getAttribute('data-filename');
-                    this.startTranscription(filename);
+                    if (filename) {
+                        this.startTranscription(filename);
+                    }
                 }
                 
                 if (e.target.closest('.view-btn')) {
                     const button = e.target.closest('.view-btn');
                     const filename = button.getAttribute('data-filename');
                     const originalName = button.getAttribute('data-original');
-                    this.viewTranscription(filename, originalName);
+                    if (filename && originalName) {
+                        this.viewTranscription(filename, originalName);
+                    }
                 }
-            });
+            };
         }
 
         escapeHtml(text) {
@@ -432,43 +435,84 @@ function initApp() {
         }
 
         async startTranscription(filename) {
-    try {
-        // Encontrar os botões
-        const buttons = document.querySelectorAll(`.transcribe-btn[data-filename="${this.escapeHtml(filename)}"]`);
-        buttons.forEach(btn => {
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Iniciando...';
-            btn.disabled = true;
-        });
+            // Verificação rápida local para evitar spam de requisições iguais
+            if (this.transcriptionRequests.has(filename)) {
+                console.log(`Transcrição já solicitada recentemente para: ${filename}. Ignorando.`);
+                return;
+            }
 
-        const response = await fetch(`./api/transcribe/${encodeURIComponent(filename)}`, {
-            method: 'POST',
-            timeout: 600000 // 10 minutos
-        });
+            // Marcar como solicitada
+            this.transcriptionRequests.add(filename);
+            // Remover do Set após um tempo para permitir retries manuais se necessário
+            setTimeout(() => {
+                this.transcriptionRequests.delete(filename);
+            }, 60000); // 1 minuto
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            try {
+                // Encontrar os botões e desabilitá-los temporariamente
+                const buttons = document.querySelectorAll(`.transcribe-btn[data-filename="${this.escapeHtml(filename)}"]`);
+                buttons.forEach(btn => {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Iniciando...';
+                    btn.disabled = true;
+                    // Armazenar HTML original para restauração em caso de erro
+                    btn.originalHtml = originalHtml;
+                });
+
+                const response = await fetch(`./api/transcribe/${encodeURIComponent(filename)}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    // Se for 404, é esperado após conclusão. Não mostrar alerta genérico.
+                    if (response.status === 404) {
+                        console.warn(`Arquivo não encontrado para transcrição: ${filename}. Pode já ter sido processado.`);
+                        // Atualizar a lista para refletir o novo status
+                        setTimeout(() => {
+                            this.loadProcessedFiles();
+                        }, 2000); // Pequeno delay para o backend atualizar
+                        return;
+                    }
+                    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Transcription started:', data);
+                
+                // Atualizar a lista imediatamente para refletir o novo status
+                setTimeout(() => {
+                    this.loadProcessedFiles();
+                }, 2000); // Pequeno delay para o backend atualizar o status
+                
+            } catch (error) {
+                console.error('Error starting transcription:', error);
+                // Só mostrar alerta para erros inesperados, não para 404
+                if (error.message && !error.message.includes('404')) {
+                    if (alert) {
+                        alert(`Erro ao iniciar transcrição: ${error.message}`);
+                    }
+                }
+                
+                // Restaurar botão em caso de erro (exceto 404)
+                const buttons = document.querySelectorAll(`.transcribe-btn[data-filename="${this.escapeHtml(filename)}"]`);
+                buttons.forEach(btn => {
+                    if (btn.originalHtml) {
+                        btn.innerHTML = btn.originalHtml;
+                    } else {
+                        btn.innerHTML = '<i class="bi bi-translate"></i> Transcrever';
+                    }
+                    btn.disabled = false;
+                });
+            } finally {
+                // Em caso de sucesso ou erro (exceto 404), remover do Set após um tempo curto
+                // Para 404, já removemos acima. Para outros casos, remover após 10s para evitar spam.
+                if (!this.transcriptionRequests.has(filename)) return; // Já foi removido no caso 404
+                setTimeout(() => {
+                    this.transcriptionRequests.delete(filename);
+                }, 10000);
+            }
         }
-
-        const data = await response.json();
-        console.log('Transcription started:', data);
-        
-        // Atualizar a lista imediatamente
-        setTimeout(() => {
-            this.loadProcessedFiles();
-        }, 1000);
-        
-    } catch (error) {
-        console.error('Error starting transcription:', error);
-        alert(`Erro ao iniciar transcrição: ${error.message}`);
-        
-        // Restaurar botão em caso de erro
-        const buttons = document.querySelectorAll(`.transcribe-btn[data-filename="${this.escapeHtml(filename)}"]`);
-        buttons.forEach(btn => {
-            btn.innerHTML = '<i class="bi bi-translate"></i> Transcrever';
-            btn.disabled = false;
-        });
-    }
-}
 
         async viewTranscription(filename, originalName) {
             // Inicializar modal
