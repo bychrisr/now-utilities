@@ -1,4 +1,5 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
+# ~/apps/now-utilities/backend/app/main.py
+from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks # Importação correta
 from fastapi.middleware.cors import CORSMiddleware
 from faster_whisper import WhisperModel
 import tempfile
@@ -7,10 +8,9 @@ import time
 import logging
 import uuid
 import json
-from typing import List
+from typing import List # Importação correta para List
 import aiofiles
 from datetime import datetime
-import asyncio
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -42,45 +42,28 @@ model_size = os.getenv("WHISPER_MODEL_SIZE", "medium")
 device = os.getenv("WHISPER_DEVICE", "cpu")
 compute_type = os.getenv("WHISPER_COMPUTE_TYPE", "int8")
 
-# Variável global para o modelo
-model = None
-model_loaded = False
+logger.info(f"Carregando modelo Whisper: {model_size} no device: {device}")
 
-async def load_model():
-    """Carregar modelo Whisper durante a inicialização"""
-    global model, model_loaded
-    logger.info(f"Carregando modelo Whisper: {model_size} no device: {device}")
-    
-    try:
-        model = WhisperModel(model_size, device=device, compute_type=compute_type)
-        model_loaded = True
-        logger.info("✅ Modelo Whisper carregado com sucesso! API pronta para uso.")
-    except Exception as e:
-        logger.error(f"❌ Erro ao carregar modelo Whisper: {str(e)}")
-        raise
-
-# Carregar modelo durante a inicialização
-@app.on_event("startup")
-async def startup_event():
-    await load_model()
+# Inicializar o modelo Whisper com logging
+model = WhisperModel(model_size, device=device, compute_type=compute_type)
+logger.info("✅ Modelo Whisper carregado com sucesso! API pronta para uso.")
 
 @app.get("/")
 async def root():
     return {
         "message": "Whisper Transcription API",
         "model_size": model_size,
-        "device": device,
-        "model_loaded": model_loaded
+        "device": device
     }
 
-def get_unique_filename(directory, original_filename):
-    """Gerar nome de arquivo único adicionando número se necessário"""
+def get_unique_filename(original_filename):
+    """Gerar nome único para evitar sobreposição de arquivos"""
     base_name, extension = os.path.splitext(original_filename)
     counter = 1
     new_filename = original_filename
     
-    while os.path.exists(os.path.join(directory, new_filename)):
-        new_filename = f"{base_name}({counter}){extension}"
+    while os.path.exists(os.path.join(INPUT_DIR, new_filename)):
+        new_filename = f"{base_name}_{counter}{extension}"
         counter += 1
     
     return new_filename
@@ -88,9 +71,7 @@ def get_unique_filename(directory, original_filename):
 @app.post("/upload")
 async def upload_files(files: List[UploadFile] = File(...)):
     """Upload de múltiplos arquivos"""
-    if not model_loaded:
-        raise HTTPException(status_code=503, detail="Modelo ainda não carregado, aguarde...")
-    
+    logger.info("Recebendo arquivos para upload...")
     uploaded_files = []
     
     for file in files:
@@ -98,7 +79,7 @@ async def upload_files(files: List[UploadFile] = File(...)):
             raise HTTPException(status_code=400, detail=f"Arquivo {file.filename} não é de áudio")
         
         # Gerar nome único para evitar conflitos
-        unique_filename = get_unique_filename(INPUT_DIR, file.filename)
+        unique_filename = get_unique_filename(file.filename)
         file_path = os.path.join(INPUT_DIR, unique_filename)
         
         # Salvar arquivo
@@ -122,41 +103,81 @@ async def upload_files(files: List[UploadFile] = File(...)):
 
 @app.post("/transcribe/{filename}")
 async def transcribe_file(filename: str, background_tasks: BackgroundTasks):
-    """Iniciar transcrição de um arquivo específico"""
-    if not model_loaded:
-        raise HTTPException(status_code=503, detail="Modelo não disponível")
+    """Iniciar transcrição de um arquivo específico em segundo plano."""
+    logger.info(f"Solicitando transcrição para arquivo: {filename}")
     
     file_path = os.path.join(INPUT_DIR, filename)
     
     if not os.path.exists(file_path):
+        logger.warning(f"Arquivo solicitado para transcrição não encontrado: {filename}")
         raise HTTPException(status_code=404, detail="Arquivo não encontrado")
+
+    base_name = os.path.splitext(filename)[0]
+    status_path = os.path.join(OUTPUT_DIR, f"{base_name}_status.json")
+
+    # Verificar status existente
+    current_status = None
+    if os.path.exists(status_path):
+        try:
+            async with aiofiles.open(status_path, 'r', encoding='utf-8') as f:
+                status_data = json.loads(await f.read())
+            current_status = status_data.get("status")
+        except Exception as e:
+            logger.error(f"Erro ao ler status existente para {filename}: {e}")
+
+    # Impedir iniciar transcrição se já estiver em andamento
+    if current_status == "processing":
+        logger.info(f"Transcrição já em andamento para {filename}.")
+        return {
+            "message": "Transcrição já em andamento",
+            "filename": filename,
+            "status": "processing"
+        }
+
+    # Se não houver status ou for um status que permite reiniciar, iniciar transcrição em background
+    logger.info(f"Iniciando nova transcrição em background para arquivo: {filename}")
     
-    # Criar arquivo de status indicando que a transcrição começou
+    # Criar/atualizar arquivo de status indicando que a transcrição começou
     status_data = {
         "status": "processing",
         "started_at": datetime.now().isoformat()
     }
-    status_path = os.path.join(OUTPUT_DIR, f"{os.path.splitext(filename)[0]}_status.json")
-    async with aiofiles.open(status_path, 'w') as f:
-        await f.write(json.dumps(status_data, indent=2))
+    async with aiofiles.open(status_path, 'w', encoding='utf-8') as f:
+        await f.write(json.dumps(status_data, indent=2, ensure_ascii=False))
     
-    # Iniciar transcrição em background
+    # Agendar a transcrição para rodar em background
     background_tasks.add_task(process_transcription, filename)
     
     return {
-        "message": "Transcrição iniciada",
+        "message": "Transcrição iniciada em background",
         "filename": filename,
         "status": "processing"
     }
 
 async def process_transcription(filename: str):
-    """Processar transcrição em background"""
+    """Processar transcrição em background."""
     start_time = time.time()
     file_path = os.path.join(INPUT_DIR, filename)
     output_filename = f"{os.path.splitext(filename)[0]}.txt"
     output_path = os.path.join(OUTPUT_DIR, output_filename)
     status_path = os.path.join(OUTPUT_DIR, f"{os.path.splitext(filename)[0]}_status.json")
     
+    # Verificação extra de segurança
+    if not os.path.exists(file_path):
+        error_msg = f"Arquivo de origem não encontrado durante processamento: {filename}"
+        logger.error(error_msg)
+        error_status = {
+            "status": "error",
+            "error": error_msg,
+            "completed_at": datetime.now().isoformat()
+        }
+        try:
+            async with aiofiles.open(status_path, 'w', encoding='utf-8') as f:
+                await f.write(json.dumps(error_status, indent=2, ensure_ascii=False))
+        except:
+             pass # Ignorar erro ao salvar status se o arquivo original já não existe
+        return
+
     try:
         logger.info(f"Iniciando transcrição para arquivo: {filename}")
         
@@ -179,7 +200,7 @@ async def process_transcription(filename: str):
         end_time = time.time()
         processing_time = end_time - start_time
         
-        # Salvar transcrição
+        # Salvar transcrição com codificação UTF-8
         async with aiofiles.open(output_path, 'w', encoding='utf-8') as f:
             await f.write(transcription.strip())
         
@@ -196,7 +217,7 @@ async def process_transcription(filename: str):
         }
         
         metadata_path = os.path.join(OUTPUT_DIR, f"{os.path.splitext(filename)[0]}_metadata.json")
-        async with aiofiles.open(metadata_path, 'w') as f:
+        async with aiofiles.open(metadata_path, 'w', encoding='utf-8') as f:
             await f.write(json.dumps(metadata, indent=2, ensure_ascii=False))
         
         # Atualizar status para completed
@@ -205,8 +226,8 @@ async def process_transcription(filename: str):
             "completed_at": datetime.now().isoformat(),
             "processing_time": round(processing_time, 2)
         }
-        async with aiofiles.open(status_path, 'w') as f:
-            await f.write(json.dumps(status_data, indent=2))
+        async with aiofiles.open(status_path, 'w', encoding='utf-8') as f:
+            await f.write(json.dumps(status_data, indent=2, ensure_ascii=False))
         
         # Remover arquivo de áudio original após transcrição completa
         if os.path.exists(file_path):
@@ -224,8 +245,11 @@ async def process_transcription(filename: str):
             "error": str(e),
             "completed_at": datetime.now().isoformat()
         }
-        async with aiofiles.open(status_path, 'w') as f:
-            await f.write(json.dumps(error_status, indent=2))
+        try:
+            async with aiofiles.open(status_path, 'w', encoding='utf-8') as f:
+                await f.write(json.dumps(error_status, indent=2, ensure_ascii=False))
+        except Exception as write_error:
+             logger.error(f"Falha ao salvar status de erro para {filename}: {write_error}")
 
 @app.get("/files")
 async def list_files():
@@ -247,87 +271,76 @@ async def list_files():
                     "status": "uploaded"
                 })
     
-    # Arquivos de saída (transcrições e status)
+    # Arquivos de saída (transcrições, status, metadados)
     if os.path.exists(OUTPUT_DIR):
-        processed_files = set()
+        processed_files = {} # Dicionário para armazenar informações por base_name
         
         for filename in sorted(os.listdir(OUTPUT_DIR)):
+            file_path = os.path.join(OUTPUT_DIR, filename)
+            if not os.path.isfile(file_path):
+                continue
+                
             if filename.endswith('_status.json'):
                 # Arquivo de status
                 base_name = filename.replace('_status.json', '')
-                if base_name in processed_files:
-                    continue
-                    
-                processed_files.add(base_name)
-                
-                status_path = os.path.join(OUTPUT_DIR, filename)
-                metadata_path = os.path.join(OUTPUT_DIR, f"{base_name}_metadata.json")
+                if base_name not in processed_files:
+                    processed_files[base_name] = {"base_name": base_name}
                 
                 # Ler status
-                status_data = {}
-                if os.path.exists(status_path):
-                    async with aiofiles.open(status_path, 'r') as f:
-                        status_content = await f.read()
-                        status_data = json.loads(status_content)
-                
-                # Ler metadados se existirem
-                metadata = {}
-                if os.path.exists(metadata_path):
-                    async with aiofiles.open(metadata_path, 'r') as f:
-                        metadata_content = await f.read()
-                        metadata = json.loads(metadata_content)
-                
-                # Verificar se existe arquivo de transcrição
-                txt_file = f"{base_name}.txt"
-                txt_path = os.path.join(OUTPUT_DIR, txt_file)
-                txt_exists = os.path.exists(txt_path)
-                
-                files.append({
-                    "type": "processed",
-                    "filename": base_name,
-                    "original_name": metadata.get('original_filename', base_name),
-                    "status": status_data.get('status', 'unknown'),
-                    "started_at": status_data.get('started_at'),
-                    "completed_at": status_data.get('completed_at'),
-                    "processing_time": status_data.get('processing_time'),
-                    "language": metadata.get('language'),
-                    "duration": metadata.get('duration'),
-                    "error": status_data.get('error') if status_data.get('status') == 'error' else None
-                })
+                try:
+                    async with aiofiles.open(file_path, 'r', encoding='utf-8') as f:
+                        status_data = json.loads(await f.read())
+                    processed_files[base_name].update(status_data)
+                    processed_files[base_name]["status_file_exists"] = True
+                except Exception as e:
+                    logger.error(f"Erro ao ler status {filename}: {e}")
+                    
             elif filename.endswith('.txt') and not filename.endswith('_status.json'):
-                # Arquivo de transcrição sem status (transcrição concluída)
+                # Arquivo de transcrição
                 base_name = os.path.splitext(filename)[0]
-                if base_name in processed_files:
-                    continue
-                    
-                # Verificar se já existe status para este arquivo
-                status_path = os.path.join(OUTPUT_DIR, f"{base_name}_status.json")
-                if os.path.exists(status_path):
-                    continue  # Já foi processado acima
-                    
-                processed_files.add(base_name)
+                if base_name not in processed_files:
+                    processed_files[base_name] = {"base_name": base_name}
+                processed_files[base_name]["transcription_file"] = filename
                 
-                txt_path = os.path.join(OUTPUT_DIR, filename)
-                metadata_path = os.path.join(OUTPUT_DIR, f"{base_name}_metadata.json")
+            elif filename.endswith('_metadata.json'):
+                # Arquivo de metadados
+                base_name = filename.replace('_metadata.json', '')
+                if base_name not in processed_files:
+                    processed_files[base_name] = {"base_name": base_name}
                 
-                stat = os.stat(txt_path)
-                metadata = {}
-                if os.path.exists(metadata_path):
-                    async with aiofiles.open(metadata_path, 'r') as f:
-                        metadata_content = await f.read()
-                        metadata = json.loads(metadata_content)
-                
-                files.append({
-                    "type": "processed",
-                    "filename": base_name,
-                    "original_name": metadata.get('original_filename', base_name),
-                    "status": "completed",
-                    "completed_at": metadata.get('completed_at'),
-                    "processing_time": metadata.get('processing_time'),
-                    "language": metadata.get('language'),
-                    "duration": metadata.get('duration')
-                })
+                # Ler metadados
+                try:
+                    async with aiofiles.open(file_path, 'r', encoding='utf-8') as f:
+                        metadata = json.loads(await f.read())
+                    processed_files[base_name].update(metadata)
+                    processed_files[base_name]["metadata_file_exists"] = True
+                except Exception as e:
+                    logger.error(f"Erro ao ler metadados {filename}: {e}")
+
+        # Converter dicionário em lista e formatar
+        for base_name, file_info in processed_files.items():
+            # Determinar o status final
+            status = file_info.get("status", "unknown")
+            if status == "unknown" and file_info.get("transcription_file"):
+                status = "completed"
+            elif status == "unknown":
+                status = "processing" # Ou outro status apropriado se não houver status.json ainda
+            
+            files.append({
+                "type": "processed",
+                "filename": base_name,
+                "original_name": file_info.get("original_filename", base_name),
+                "status": status,
+                "started_at": file_info.get("started_at"),
+                "completed_at": file_info.get("completed_at"),
+                "processing_time": file_info.get("processing_time"),
+                "language": file_info.get("language"),
+                "duration": file_info.get("duration"),
+                "error": file_info.get("error") if status == "error" else None,
+                "transcription_file": file_info.get("transcription_file")
+            })
     
+    # logger.info(f"Arquivos listados: {files}") # Para debug
     return {"files": files}
 
 @app.get("/transcription/{filename}")
