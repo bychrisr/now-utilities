@@ -13,8 +13,8 @@
 }
 
 .drop-zone i {
-    font-size: 3rem;
-    color: #007bff;
+    font-size: 1.5rem;
+    color: #FFF;
     margin-bottom: 15px;
 }
 
@@ -48,4 +48,16 @@
 
 .modal-open {
     overflow: hidden;
+}
+
+/* Ajustes para a nova estrutura */
+.card {
+    margin-bottom: 20px;
+}
+
+.btn-transcribe {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
 }
