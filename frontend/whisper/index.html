@@ -8,103 +8,105 @@
     <link rel="stylesheet" href="./css/bootstrap-icons.css">
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+    <!-- Importar a fonte Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="bg-dark">
+
     <div class="container py-5">
-        <div class="text-center mb-5"> <!-- Title Page-->
+        <div class="text-center mb-5">
             <h1 class="display-4 fw-bold text-primary">Whisper Transcription</h1>
             <p class="lead text-muted">Converta seus arquivos de áudio em texto com inteligência artificial</p>
-        </div> <!-- END Title Page-->
+        </div>
 
         <div class="row justify-content-center">
 
-        <div class="col-sm-6"> <!-- Upload Card -->
-            <div class="card">
-                <div class="card-body">
-                    <form id="uploadForm">
-                        <div class="mb-4">
-                        <h5 class="card-title">Upload direto de Áuduios</h5>
-                        <p class="card-text">Selecione ou arraste arquivos de áudio</p>
-                            
-                            <!-- Drop Zone -->
-                            <div id="dropZone" class="drop-zone">
-                                <i class="bi bi-cloud-upload"></i>
-                                <h5>Arraste e solte seus arquivos aqui</h5>
-                                <p class="text-muted mb-3">ou</p>
-                                <button type="button" class="btn btn-primary" id="browseBtn">
-                                    <i class="bi bi-folder2-open me-2"></i>Procurar Arquivos
-                                </button>
-                                <input type="file" id="fileInput" class="d-none" accept="audio/*" multiple>
-                            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <form id="uploadForm">
+                            <div class="mb-4">
+                                <h5 class="card-title">Upload direto de Áudios</h5>
+                                <p class="card-text">Selecione ou arraste arquivos de áudio</p>
 
-                            <small class="text-muted" >
-                                <ul class="mb-0" style="padding-top:10px;">
-                                    <li>Suporta formatos: MP3, WAV, M4A, FLAC, etc.</li>
-                                </ul>
-                            </small>
-
-                            <!-- File List -->
-                            <div id="fileList" class="file-list d-none mt-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h6 class="mb-0">Arquivos Selecionados:</h6>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" id="clearFiles">
-                                        <i class="bi bi-trash"></i> Limpar Todos
+                                <!-- Drop Zone -->
+                                <div id="dropZone" class="drop-zone">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <h5>Arraste e solte seus arquivos aqui</h5>
+                                    <p class="text-muted mb-3">ou</p>
+                                    <button type="button" class="btn btn-primary" id="browseBtn">
+                                        <i class="bi bi-folder2-open me-2"></i>Procurar Arquivos
                                     </button>
+                                    <input type="file" id="fileInput" class="d-none" accept="audio/*" multiple>
                                 </div>
-                                <div id="filesContainer"></div>
+
+                                <small class="text-muted">
+                                    <ul class="mb-0" style="padding-top:10px;">
+                                        <li>Suporta formatos: MP3, WAV, M4A, FLAC, etc.</li>
+                                    </ul>
+                                </small>
+
+                                <!-- File List -->
+                                <div id="fileList" class="file-list d-none mt-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">Arquivos Selecionados:</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="clearFiles">
+                                            <i class="bi bi-trash"></i> Limpar Todos
+                                        </button>
+                                    </div>
+                                    <div id="filesContainer"></div>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Submit Button -->
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
-                                <i class="bi bi-upload me-2"></i>Enviar Arquivos
-                            </button>
-                        </div>
-                    </form>
+                            <!-- Submit Button -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
+                                    <i class="bi bi-upload me-2"></i>Enviar Arquivos
+                                </button>
+                            </div>
+                        </form>
 
-                    <!-- Loading Indicator -->
-                    <div id="loading" class="loading text-center mt-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Enviando...</span>
+                        <!-- Loading Indicator -->
+                        <div id="loading" class="loading text-center mt-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Enviando...</span>
+                            </div>
+                            <p class="mt-2">Enviando arquivos... Aguarde</p>
                         </div>
-                        <p class="mt-2">Enviando arquivos... Aguarde</p>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-sm-6 mb-3 mb-sm-0"> <!-- Minhas Transcrições -->
-            <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Minhas Transcrições</h5>
-                    <!-- Files Management Section -->
-                    <div class="card shadow">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="bi bi-files"></i> Status</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-grid gap-2 mb-3">
-                                <button class="btn btn-outline-primary" type="button" id="refreshFiles">
-                                    <i class="bi bi-arrow-repeat"></i> Atualizar Lista
-                                </button>
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Minhas Transcrições</h5>
+                        <!-- Files Management Section -->
+                        <div class="card shadow">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="bi bi-files"></i> Status</h5>
                             </div>
-                            
-                            <div id="filesTableContainer">
-                                <div class="text-center text-muted">
-                                    <i class="bi bi-inbox"></i>
-                                    <p class="mb-0">Nenhum arquivo processado ainda</p>
+                            <div class="card-body">
+                                <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-outline-primary" type="button" id="refreshFiles">
+                                        <i class="bi bi-arrow-repeat"></i> Atualizar Lista
+                                    </button>
+                                </div>
+
+                                <div id="filesTableContainer">
+                                    <div class="text-center text-muted">
+                                        <i class="bi bi-inbox"></i>
+                                        <p class="mb-0">Nenhum arquivo processado ainda</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-            </div> <!-- END Minhas Transcrições -->
+                </div>
             </div>
-        </div>
 
-        </div>
         </div>
     </div>
 

@@ -1,38 +1,46 @@
-/* Importar a fonte Inter do Google Fonts */
+/* ~/apps/now-utilities/frontend/whisper/css/styles.css */
+
+/* --- Integração da Identidade Visual NowCompany (Orisha Style) --- */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-:root {
-  /* --- Cores do Tema Light (padrão) --- */
-  --now-primary: #00302A;     /* Deep Green */
-  --now-secondary: #FA8D2A;   /* Warm Gold */
-  --now-background: #FFFFFF;  /* White */
-  --now-surface: #FFFFFF;     /* Usando White como Surface também para light */
-  --now-error: #EF5550;       /* Soft Red */
-  --now-on-primary: #FFFFFF;  /* Texto sobre Deep Green */
-  --now-on-secondary: #000000; /* Texto sobre Warm Gold (ajuste se necessário) */
-  --now-on-background: #000000; /* Texto principal */
-  --now-on-surface: #000000;  /* Texto em surfaces */
-  --now-on-error: #FFFFFF;    /* Texto sobre Soft Red */
+* {
+    color:#FFF!important;
+}
 
-  /* --- Tipografia --- */
+:root {
+  /* Cores */
+  --now-primary-light: #00302A; /* Deep Green (Light) */
+  --now-secondary-light: #FAB02A; /* Warm Gold (Light) */
+  --now-background-light: #FFFFFF; /* White (Light) */
+  --now-surface-light: #FFFFFF; /* Surface (Light) */
+  --now-error-light: #EF5550; /* Soft Red (Light) */
+
+  --now-primary-dark: #01212A; /* Deep Navy (Dark) */
+  --now-secondary-dark: #FA8D2A; /* Warm Gold (Dark) */
+  --now-background-dark: #0B2636; /* Dark Teal (Dark) */
+  --now-surface-dark: #1C1C1C; /* Dark Charcoal (Dark) */
+  --now-error-dark: #EF5550; /* Soft Red (Dark) */
+
+  /* Fontes */
   --now-font-family-sans-serif: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --now-font-family-base: var(--now-font-family-sans-serif);
 
-  /* Tamanhos de fonte (ajustados para Bootstrap 5) */
-  --now-font-size-display: 2.5rem; /* 40pt -> ~2.5rem */
-  --now-font-size-headline: 1.75rem; /* 28pt -> ~1.75rem */
-  --now-font-size-subheading: 1.25rem; /* 20pt -> ~1.25rem */
-  --now-font-size-body: 0.875rem; /* 14pt -> 0.875rem */
+  /* Tamanhos de fonte */
+  --now-font-size-display: 2.5rem; /* Display Title */
+  --now-font-size-headline: 1.75rem; /* Headline */
+  --now-font-size-subheading: 1.25rem; /* Sub-heading */
+  --now-font-size-body: 0.875rem; /* Body Text */
 }
 
 /* --- Sobrescrever variáveis padrão do Bootstrap 5 --- */
 /* Isso aplica automaticamente as cores e fontes personalizadas */
 :root {
   /* Cores */
-  --bs-primary: var(--now-primary);
-  --bs-secondary: var(--now-secondary);
-  --bs-danger: var(--now-error); /* Usar Soft Red para erros */
-  --bs-body-bg: var(--now-background);
+  --bs-primary: var(--now-primary-dark);
+  --bs-secondary: var(--now-secondary-dark);
+  --bs-danger: var(--now-error-dark); /* Usar Soft Red para erros */
+  --bs-body-bg: var(--now-background-dark);
   --bs-body-color: var(--now-on-background);
 
   /* Tipografia */
@@ -47,91 +55,29 @@
 
 /* --- Estilos adicionais para elementos específicos --- */
 
-/* Aplicar tipografia aos títulos */
-.display-4 {
-  font-size: var(--now-font-size-display) !important;
-  font-weight: 700 !important; /* Bold */
-}
-
-h1, .h1 {
-  font-size: var(--now-font-size-headline) !important;
-  font-weight: 600 !important; /* SemiBold */
-}
-
-h5, .h5, .card-title {
-  font-size: var(--now-font-size-subheading) !important;
-  font-weight: 500 !important; /* Medium */
-}
-
-/* Estilo para os badges de status */
-.badge {
-  font-weight: 500; /* Medium */
-}
-
-/* Ajustar cor do botão primário (agora usando a cor primária personalizada) */
-.btn-primary {
-  --bs-btn-bg: var(--now-primary);
-  --bs-btn-border-color: var(--now-primary);
-  --bs-btn-hover-bg: #001a16; /* Tom mais escuro para hover */
-  --bs-btn-hover-border-color: #001a16;
-  --bs-btn-active-bg: #001a16;
-  --bs-btn-active-border-color: #001a16;
-  --bs-btn-disabled-bg: var(--now-primary);
-  --bs-btn-disabled-border-color: var(--now-primary);
-}
-
-/* Ajustar cor do botão secundário (agora usando a cor secundária personalizada) */
-.btn-secondary {
-  --bs-btn-bg: var(--now-secondary);
-  --bs-btn-border-color: var(--now-secondary);
-  --bs-btn-hover-bg: #e97c19; /* Tom mais escuro para hover */
-  --bs-btn-hover-border-color: #e97c19;
-  --bs-btn-active-bg: #e97c19;
-  --bs-btn-active-border-color: #e97c19;
-  --bs-btn-disabled-bg: var(--now-secondary);
-  --bs-btn-disabled-border-color: var(--now-secondary);
-  color: var(--now-on-secondary) !important; /* Garantir contraste */
-}
-
-/* Ajustar cor do botão de sucesso (verde) para manter funcionalidade */
-.btn-success {
-  --bs-btn-bg: #198754; /* Verde padrão do Bootstrap */
-  --bs-btn-border-color: #198754;
-  --bs-btn-hover-bg: #157347;
-  --bs-btn-hover-border-color: #157347;
-  --bs-btn-active-bg: #157347;
-  --bs-btn-active-border-color: #157347;
-  --bs-btn-disabled-bg: #198754;
-  --bs-btn-disabled-border-color: #198754;
-}
-
-/* --- Estilos existentes do projeto --- */
-
 .drop-zone {
-    border: 2px dashed var(--now-primary);
+    border: 2px dashed var(--now-primary-dark);
     border-radius: 10px;
     padding: 40px;
     text-align: center;
-    background-color: var(--now-surface);
+    background-color: rgba(255, 255, 255, 0.1); /* Translúcido para tema escuro */
     transition: all 0.3s ease;
-    /* Adicionar sombra sutil */
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 .drop-zone.dragover {
-    background-color: #e3f2fd; /* Pode manter este azul claro para feedback de drag */
-    border-color: #0056b3; /* Ou escurecer a cor primária */
+    background-color: rgba(255, 255, 255, 0.2); /* Mais translúcido ao arrastar */
+    border-color: var(--now-secondary-dark);
 }
 
 .drop-zone i {
-    font-size: 1.5rem;
-    color: var(--now-primary);
+    font-size: 3rem;
+    color: var(--now-primary-dark);
     margin-bottom: 15px;
 }
 
 .transcription-result {
-    background-color: var(--now-surface);
-    border-left: 4px solid var(--now-primary);
+    background-color: var(--now-surface-dark);
+    border-left: 4px solid var(--now-primary-dark);
     padding: 20px;
     margin-top: 20px;
     border-radius: 0 5px 5px 0;
@@ -142,10 +88,11 @@ h5, .h5, .card-title {
 }
 
 .file-info {
-    background-color: #e9ecef; /* Pode usar uma cor neutra ou definir uma variável para superfícies secundárias */
+    background-color: rgba(255, 255, 255, 0.1); /* Surface com opacidade */
     padding: 10px;
     border-radius: 5px;
     margin-top: 15px;
+    color: var(--now-on-surface);
 }
 
 .file-list {
@@ -161,61 +108,248 @@ h5, .h5, .card-title {
     overflow: hidden;
 }
 
-/* Ajustes para a nova estrutura */
 .card {
     margin-bottom: 20px;
-    border: none; /* Remover borda padrão */
-    border-radius: 10px; /* Bordas arredondadas */
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05); /* Sombra suave */
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
+    background-color: var(--now-surface-dark);
+    color: var(--now-on-surface);
 }
 
-/* Cabeçalho do card com cor primária */
+.card-body {
+    color: var(--now-on-surface);
+}
+
 .card-header.bg-primary {
-    background-color: var(--now-primary) !important;
+    background-color: var(--now-primary-dark) !important;
     border-bottom: none;
     border-radius: 10px 10px 0 0 !important;
+    color: var(--now-on-primary);
 }
 
-/* Botão de refresh */
-.btn-outline-primary {
-    --bs-btn-color: var(--now-primary);
-    --bs-btn-border-color: var(--now-primary);
-    --bs-btn-hover-color: var(--now-on-primary);
-    --bs-btn-hover-bg: var(--now-primary);
-    --bs-btn-hover-border-color: var(--now-primary);
-    --bs-btn-active-color: var(--now-on-primary);
-    --bs-btn-active-bg: var(--now-primary);
-    --bs-btn-active-border-color: var(--now-primary);
+.table {
+    --bs-table-color: var(--now-on-surface);
+    --bs-table-bg: transparent;
+    --bs-table-border-color: rgba(255, 255, 255, 0.1);
+    color: var(--now-on-surface);
 }
 
-/* Tabela */
 .table-hover > tbody > tr:hover > * {
-    --bs-table-hover-bg: rgba(0, 48, 42, 0.075); /* Hover suave com a cor primária */
+    --bs-table-hover-bg: rgba(1, 33, 42, 0.2); /* Hover suave com a cor primária */
+    color: var(--now-on-surface);
 }
 
-/* Modal */
+.table > :not(caption) > * > * {
+    background-color: transparent; /* Fundo transparente para células */
+    border-bottom-width: 0; /* Remover borda inferior */
+    box-shadow: inset 0 0 0 9999px transparent; /* Hack para compatibilidade */
+}
+
 .modal-content {
     border: none;
     border-radius: 10px;
+    background-color: var(--now-surface-dark);
+    color: var(--now-on-surface);
 }
 
 .modal-header {
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--now-surface-dark);
+}
+
+.modal-body {
+    background-color: var(--now-surface-dark);
+    color: var(--now-on-surface);
 }
 
 .modal-footer {
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--now-surface-dark);
 }
 
-/* Botão de fechar modal */
 .btn-close {
-    filter: var(--bs-btn-close-white-filter); /* Ajusta a cor do 'x' se o fundo for escuro */
+    filter: var(--bs-btn-close-white-filter);
 }
 
-/* Garantir que o texto dentro de elementos com fundo colorido tenha bom contraste */
-.bg-primary, .bg-success, .bg-danger, .bg-warning {
-    color: white; /* Ou usar as variáveis --now-on-* se definidas */
+#modalTranscriptionText {
+    white-space: pre-wrap; /* Preservar quebras de linha e espaços */
+    word-wrap: break-word; /* Quebrar palavras longas */
+    max-height: 60vh;
+    overflow-y: auto;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 5px;
 }
-.bg-info {
-    color: #000; /* Ou usar uma cor de texto apropriada */
+
+a {
+    color: var(--now-secondary-dark);
+}
+
+a:hover {
+    color: #ffb55c;
+}
+
+
+
+
+
+
+
+/* --- Correção e Refinamento dos Estilos para o Tema Escuro --- */
+
+/* Garantir cor do body */
+body.bg-dark {
+  color: var(--now-on-surface);
+  background-color: var(--now-background-dark); /* Garantir fundo do body */
+}
+
+/* Cards e seus elementos */
+body.bg-dark .card,
+.bg-dark .card {
+  background-color: var(--now-surface-dark);
+  color: var(--now-on-surface);
+  border: none; /* Remover borda padrão se necessário */
+}
+
+body.bg-dark .card-header,
+.bg-dark .card-header {
+  background-color: var(--now-primary-dark) !important; /* Pode ser necessário aqui */
+  color: var(--now-on-primary) !important;
+  border-bottom: none;
+}
+
+body.bg-dark .card-title,
+.bg-dark .card-title {
+  color: var(--now-on-surface) !important; /* Aumentar especificidade */
+}
+
+body.bg-dark .card-text,
+.bg-dark .card-text {
+  color: var(--now-on-surface) !important;
+}
+
+/* Textos */
+body.bg-dark .lead,
+.bg-dark .lead {
+  color: var(--now-on-surface) !important;
+}
+
+body.bg-dark .text-muted,
+.bg-dark .text-muted {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+body.bg-dark .text-primary,
+.bg-dark .text-primary {
+  color: var(--now-primary-dark) !important;
+}
+
+body.bg-dark .text-secondary,
+.bg-dark .text-secondary {
+  color: var(--now-secondary-dark) !important;
+}
+
+/* Tabelas */
+body.bg-dark .table,
+.bg-dark .table {
+  --bs-table-color: var(--now-on-surface);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: rgba(255, 255, 255, 0.1);
+  color: var(--now-on-surface);
+}
+
+body.bg-dark .table > :not(caption) > * > *,
+.bg-dark .table > :not(caption) > * > * {
+  background-color: transparent;
+  border-bottom-width: 0;
+  box-shadow: inset 0 0 0 9999px transparent;
+}
+
+body.bg-dark .table-hover > tbody > tr:hover > *,
+.bg-dark .table-hover > tbody > tr:hover > * {
+  --bs-table-hover-bg: rgba(1, 33, 42, 0.2);
+  color: var(--now-on-surface);
+}
+
+/* Modais */
+body.bg-dark .modal-content,
+.bg-dark .modal-content {
+  background-color: var(--now-surface-dark);
+  color: var(--now-on-surface);
+}
+
+body.bg-dark .modal-header,
+.bg-dark .modal-header,
+body.bg-dark .modal-body,
+.bg-dark .modal-body,
+body.bg-dark .modal-footer,
+.bg-dark .modal-footer {
+  background-color: var(--now-surface-dark);
+  color: var(--now-on-surface);
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Botões de fechar */
+body.bg-dark .btn-close,
+.bg-dark .btn-close {
+  filter: var(--bs-btn-close-white-filter); /* Este já é !important internamente */
+}
+
+/* Área de transcrição no modal */
+body.bg-dark #modalTranscriptionText,
+.bg-dark #modalTranscriptionText {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: var(--now-on-surface) !important;
+}
+
+/* Pequenos ajustes para garantir contraste */
+.bg-dark small,
+.bg-dark .small {
+  color: rgba(255, 255, 255, 0.75) !important; /* Texto auxiliar */
+}
+
+/* Links */
+body.bg-dark a,
+.bg-dark a {
+  color: var(--now-secondary-dark);
+}
+body.bg-dark a:hover,
+.bg-dark a:hover {
+  color: #ffb55c; /* Tom mais claro do secundário para hover */
+}
+
+/* Garantir que elementos dentro de .bg-dark tenham as cores corretas */
+.bg-dark h1, .bg-dark h2, .bg-dark h3, .bg-dark h4, .bg-dark h5, .bg-dark h6 {
+  color: var(--now-on-surface) !important;
+}
+
+/* Garantir que elementos de formulário tenham bom contraste */
+.bg-dark input, .bg-dark button, .bg-dark select, .bg-dark textarea {
+  color: var(--now-on-background) !important;
+  background-color: var(--now-surface-dark) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Garantir que o conteúdo da drop zone tenha bom contraste */
+.drop-zone {
+  color: var(--now-on-surface); /* Ou uma cor específica para o texto dentro da drop zone */
+}
+.drop-zone h5 {
+  color: inherit !important; /* Herdar a cor do pai (.drop-zone) */
+}
+.drop-zone p {
+  color: inherit !important;
+}
+
+/* Se houverem badges */
+.bg-dark .badge {
+  color: var(--bs-badge-color, var(--now-on-surface)) !important; /* Usar cor padrão do badge ou fallback */
+}
+
+/* Se houverem alerts */
+.bg-dark .alert {
+  color: var(--now-on-surface) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
