@@ -49,5 +49,5 @@ docker-compose.override.yml
 .DS_Store
 Thumbs.db
 
-#backend/inputs_temp/*
-#backend/outputs/*
+backend/inputs_temp/*
+backend/outputs/*
